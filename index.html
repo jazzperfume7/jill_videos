@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Video Hub</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #141414;
+      color: white;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      overflow-x: hidden;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+    }
+    .logo { font-size: 28px; font-weight: bold; color: #e50914; }
+    .hero {
+      height: 70vh;
+      background: linear-gradient(to top, #141414 10%, transparent),
+                  url('https://picsum.photos/1600/900?random=22') center/cover;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 50px 80px;
+    }
+    .hero-content h1 { font-size: 48px; margin-bottom: 15px; }
+    .hero-content p { font-size: 18px; max-width: 500px; color: #ccc; }
+    .row { margin: 40px 0 20px 50px; }
+    .row-title { font-size: 22px; margin-bottom: 15px; font-weight: 600; }
+    .row-posters {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 15px;
+    }
+    .row-posters::-webkit-scrollbar { height: 6px; }
+    .row-posters::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
+
+    .poster {
+      min-width: 220px;
+      height: 130px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+      position: relative;
+      background-color: #333;
+      background-size: cover;
+      background-position: center;
+    }
+    .poster:hover { transform: scale(1.08); z-index: 10; }
+    .poster-title {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 30px 10px 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+      padding: 40px 0;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      width: 90%;
+      max-width: 900px;
+      position: relative;
+    }
+    .modal-content video,
+    .modal-content iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 8px;
+      background: #000;
+    }
+    .close-btn {
+      position: absolute;
+      top: -40px; right: 0;
+      font-size: 32px;
+      cursor: pointer;
+      color: white;
+      z-index: 20;
+    }
+
+    /* Play Button Overlay */
+    .play-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 500px;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      z-index: 10;
+    }
+    .play-btn {
+      width: 90px;
+      height: 90px;
+      background: #e50914;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border: none;
+    }
+    .play-btn:hover { transform: scale(1.1); }
+    .play-btn::after {
+      content: "";
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 18px solid transparent;
+      border-bottom: 18px solid transparent;
+      border-left: 30px solid white;
+      margin-left: 6px;
+    }
+    .click-text {
+      margin-top: 18px;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 500;
+    }
+    .timer-text {
+      margin-top: 20px;
+      font-size: 32px;
+      font-weight: bold;
+      color: #e50914;
+      display: none;
+    }
+    .timer-info {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #ccc;
+      display: none;
+    }
+
+    /* Parts Section */
+    .parts-section {
+      margin-top: 30px;
+      display: none;
+    }
+    .parts-title {
+      font-size: 20px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .parts-list {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    .part-card {
+      min-width: 180px;
+      cursor: pointer;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #222;
+      transition: transform 0.2s;
+    }
+    .part-card:hover { transform: scale(1.05); }
+    .part-thumb {
+      width: 100%;
+      height: 100px;
+      background-size: cover;
+      background-position: center;
+      background-color: #333;
+    }
+    .part-name {
+      padding: 10px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .navbar, .hero, .row { padding-left: 20px; padding-right: 20px; }
+      .hero-content h1 { font-size: 32px; }
+      .poster { min-width: 160px; height: 100px; }
+      .modal-content video,
+      .modal-content iframe,
+      .play-overlay { height: 250px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">MyVideoHub</div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>My Own Videos</h1>
+      <p>Latest • Education • Entertainment</p>
+    </div>
+  </section>
+
+  <div id="rows-container"></div>
+
+  <!-- Player Modal -->
+  <div class="modal" id="playerModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closePlayer()">&times;</span>
+      
+      <div id="playerContainer" style="position: relative;"></div>
+
+      <!-- Play Button + Timer Overlay -->
+      <div class="play-overlay" id="playOverlay">
+        <button class="play-btn" id="playBtn"></button>
+        <div class="click-text">CLICK AND WAIT 20 SECONDS</div>
+        <div class="timer-text" id="timerText">20</div>
+        <div class="timer-info" id="timerInfo">Visit the site to unlock the video</div>
+      </div>
+
+      <!-- Multiple Parts Section -->
+      <div class="parts-section" id="partsSection">
+        <div class="parts-title">More Parts</div>
+        <div class="parts-list" id="partsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="video.js"></script>
+
+  <script>
+    // ========== உங்க website link ==========
+    const YOUR_WEBSITE = "https://www.google.com";   // ← இதை மாத்துங்க
+    // ======================================
+
+    let countdownInterval = null;
+    let timeLeft = 20;
+    let currentVideo = null;
+    let timerStarted = false;
+    let isTimerRunning = false;
+
+    function createRows() {
+      const container = document.getElementById('rows-container');
+      container.innerHTML = "";
+
+      const categories = [
+        { key: 'latest', title: 'Latest' },
+        { key: 'education', title: 'Education' },
+        { key: 'entertainment', title: 'Entertainment' }
+      ];
+
+      categories.forEach(cat => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <h2 class="row-title">${cat.title}</h2>
+          <div class="row-posters" id="${cat.key}-posters"></div>
+        `;
+        container.appendChild(row);
+
+        const postersDiv = document.getElementById(`${cat.key}-posters`);
+
+        videos[cat.key].forEach(video => {
+          const poster = document.createElement('div');
+          poster.className = 'poster';
+
+          if (video.type === "youtube") {
+            poster.style.backgroundImage = `url(https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg)`;
+          } else {
+            poster.style.backgroundImage = `url(${video.thumbnail})`;
+          }
+
+          poster.innerHTML = `<div class="poster-title">${video.title}</div>`;
+          poster.onclick = () => openPlayer(video);
+          postersDiv.appendChild(poster);
+        });
+      });
+    }
+
+    function openPlayer(video) {
+      currentVideo = video;
+      timerStarted = false;
+      isTimerRunning = false;
+      timeLeft = 20;
+
+      const modal = document.getElementById('playerModal');
+      const container = document.getElementById('playerContainer');
+      const overlay = document.getElementById('playOverlay');
+      const timerText = document.getElementById('timerText');
+      const timerInfo = document.getElementById('timerInfo');
+      const playBtn = document.getElementById('playBtn');
+      const partsSection = document.getElementById('partsSection');
+      const partsList = document.getElementById('partsList');
+
+      container.innerHTML = "";
+      clearInterval(countdownInterval);
+
+      // Reset overlay
+      timerText.style.display = "none";
+      timerInfo.style.display = "none";
+      timerText.innerText = "20";
+      playBtn.style.display = "flex";
+      overlay.style.display = "flex";
+
+      // Create video element
+      if (video.type === "youtube") {
+        container.innerHTML = `<iframe id="mainVideo" src="" allowfullscreen allow="autoplay"></iframe>`;
+      } else {
+        container.innerHTML = `
+          <video id="mainVideo" controls controlslist="nodownload" 
+                 style="width:100%; height:500px; border-radius:8px; background:#000;">
+            <source src="${video.videoUrl}" type="video/mp4">
+          </video>
+        `;
+      }
+
+      // Show Parts if available
+      if (video.parts && video.parts.length > 0) {
+        partsSection.style.display = "block";
+        partsList.innerHTML = "";
+
+        video.parts.forEach(part => {
+          const card = document.createElement('div');
+          card.className = "part-card";
+          card.innerHTML = `
+            <div class="part-thumb" style="background-image: url(${part.thumbnail})"></div>
+            <div class="part-name">${part.title}</div>
+          `;
+          card.onclick = () => {
+            // Part click → அந்த part-ஐ main video-ஆ load பண்ணு
+            openPlayer({
+              title: part.title,
+              type: "video",
+              videoUrl: part.videoUrl,
+              thumbnail: part.thumbnail,
+              parts: video.parts   // same parts list keep பண்ணுறோம்
+            });
+          };
+          partsList.appendChild(card);
+        });
+      } else {
+        partsSection.style.display = "none";
+      }
+
+      modal.classList.add('active');
+    }
+
+    // Play button click
+    document.getElementById('playBtn').addEventListener('click', function() {
+      window.open(YOUR_WEBSITE, '_blank');
+      startTimer();
+    });
+
+    function startTimer() {
+      const playBtn = document.getElementById('playBtn');
+      const timerText = document.getElementById('timerText');
+      const timerInfo = document.getElementById('timerInfo');
+
+      playBtn.style.display = "none";
+      document.querySelector('.click-text').style.display = "none";
+      timerText.style.display = "block";
+      timerInfo.style.display = "block";
+
+      timerStarted = true;
+      isTimerRunning = true;
+      timeLeft = 20;
+      timerText.innerText = timeLeft;
+
+      clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        if (!isTimerRunning) return;
+
+        timeLeft--;
+        timerText.innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          isTimerRunning = false;
+          document.getElementById('playOverlay').style.display = "none";
+          startVideo();
+        }
+      }, 1000);
+    }
+
+    function handleReturnToPage() {
+      if (timerStarted && isTimerRunning && timeLeft > 0) {
+        clearInterval(countdownInterval);
+        isTimerRunning = false;
+
+        setTimeout(() => {
+          const playBtn = document.getElementById('playBtn');
+          const timerText = document.getElementById('timerText');
+          const timerInfo = document.getElementById('timerInfo');
+          const clickText = document.querySelector('.click-text');
+
+          if (playBtn) {
+            playBtn.style.display = "flex";
+            if (clickText) clickText.style.display = "block";
+            timerText.style.display = "none";
+            timerInfo.style.display = "none";
+            timerText.innerText = "20";
+          }
+        }, 1000);
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') handleReturnToPage();
+    });
+    window.addEventListener('focus', handleReturnToPage);
+    window.addEventListener('pageshow', handleReturnToPage);
+
+    function startVideo() {
+      const video = currentVideo;
+      const mainVideo = document.getElementById('mainVideo');
+
+      if (video.type === "youtube") {
+        mainVideo.src = `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0`;
+      } else {
+        mainVideo.play();
+      }
+    }
+
+    function closePlayer() {
+      clearInterval(countdownInterval);
+      timerStarted = false;
+      isTimerRunning = false;
+      document.getElementById('playerModal').classList.remove('active');
+      document.getElementById('playerContainer').innerHTML = "";
+      document.getElementById('playOverlay').style.display = "flex";
+      document.getElementById('playBtn').style.display = "flex";
+      document.querySelector('.click-text').style.display = "block";
+      document.getElementById('timerText').style.display = "none";
+      document.getElementById('timerInfo').style.display = "none";
+      document.getElementById('partsSection').style.display = "none";
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closePlayer();
+    });
+
+    document.getElementById('playerModal').addEventListener('click', e => {
+      if (e.target.id === 'playerModal') closePlayer();
+    });
+
+    createRows();
+  </script>
+</body>
+</html>
