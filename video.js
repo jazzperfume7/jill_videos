@@ -4,7 +4,7 @@
         {
           title: "My Education Video",
           type: "video",
-          videoUrl: "https://cdn2.slicedrivp.com/videos/18975.mp4",
+          videoUrl: "https://pixeldrain.com/api/file/KLrUQjDk",
           thumbnail:"https://picsum.photos/id/1015/400/225",
       parts:[
         {title:"part 1",
