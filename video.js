@@ -5,15 +5,15 @@
           title: "My Education Video",
           type: "video",
           videoUrl: "https://pixeldrain.com/api/file/KLrUQjDk",
-          thumbnail:"https://picsum.photos/id/1015/400/225",
+          thumbnail:"https://picsum.photos/1600/900?random=22",
       parts:[
         {title:"part 1",
           videoUrl:"https://cdn2.slicedrivp.com/videos/18649.mp4",
-          thumbnail:"https://picsum.photos/id/1015/400/225"
+          thumbnail:"https://picsum.photos/1600/900?random=22"
         },
         {title:"part2",
           videoUrl:"https://cdn2.slicedrivp.com/videos/18976.mp4",
-          thumbnail:"https://picsum.photos/id/1015/400/225"
+          thumbnail:"https://picsum.photos/1600/900?random=22"
         }
       ]
         },
