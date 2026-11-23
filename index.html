@@ -232,8 +232,8 @@
       <!-- Play Button + Timer Overlay -->
       <div class="play-overlay" id="playOverlay">
         <button class="play-btn" id="playBtn"></button>
-        <div class="click-text">CLICK AND WAIT 20 SECONDS</div>
-        <div class="timer-text" id="timerText">20</div>
+        <div class="click-text">CLICK AND WAIT 10 SECONDS</div>
+        <div class="timer-text" id="timerText">10</div>
         <div class="timer-info" id="timerInfo">Visit the site to unlock the video</div>
       </div>
 
@@ -249,7 +249,7 @@
 
   <script>
     // ========== உங்க website link ==========
-    const YOUR_WEBSITE = "https://www.google.com";   // ← இதை மாத்துங்க
+    const YOUR_WEBSITE = "https://uplcm.com/4/12103150";   // ← இதை மாத்துங்க
     // ======================================
 
     let countdownInterval = null;
@@ -321,6 +321,8 @@ function findByShareId(id) {
   poster.onclick = () => openPlayer(video);
   postersDiv.appendChild(poster);
 });
+  });
+    }
 
     function openPlayer(video) {
       currentVideo = video;
@@ -343,7 +345,7 @@ function findByShareId(id) {
       // Reset overlay
       timerText.style.display = "none";
       timerInfo.style.display = "none";
-      timerText.innerText = "20";
+      timerText.innerText = "10";
       playBtn.style.display = "flex";
       overlay.style.display = "flex";
 
@@ -409,7 +411,7 @@ function findByShareId(id) {
 
       timerStarted = true;
       isTimerRunning = true;
-      timeLeft = 20;
+      timeLeft = 10;
       timerText.innerText = timeLeft;
 
       clearInterval(countdownInterval);
@@ -445,7 +447,7 @@ function findByShareId(id) {
             if (clickText) clickText.style.display = "block";
             timerText.style.display = "none";
             timerInfo.style.display = "none";
-            timerText.innerText = "20";
+            timerText.innerText = "10";
           }
         }, 1000);
       }
@@ -488,7 +490,7 @@ function findByShareId(id) {
 
     document.getElementById('playerModal').addEventListener('click', e => {
       if (e.target.id === 'playerModal') closePlayer();
-      setVideoUrl(null);
+         setVideoUrl(null);
     });
 
     createRows();
